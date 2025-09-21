@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Autoservicio La Quinta</title>
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#721919" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="icon" href="img/favicon.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="page-container">
+
+        <nav class="navbar">
+            <h1 class="logo">LA QUINTA</h1>
+            <div class="search-container">
+                <input id="search-input" type="search" placeholder="Buscar producto, marca o categoría..." />
+            </div>
+            <button id="cart-btn" class="nav-cart-btn">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cart-badge" class="cart-badge">0</span>
+            </button>
+        </nav>
+
+        
+
+        <section class="main-carousel-wrapper">
+
+        <!-- Banner de promociones -->
+        <section class="banner-section">
+          <div class="banner-carousel" id="banner-carousel">
+            <div class="banner-slide"><img src="img/baner/baner1.webp" alt="Promoción 1"></div>
+            <div class="banner-slide"><img src="img/baner/baner2.webp" alt="Promoción 2"></div>
+            <div class="banner-slide"><img src="img/baner/baner3.webp" alt="Promoción 3"></div>
+            <div class="banner-slide"><img src="img/baner/baner4.webp" alt="Promoción 4"></div>
+            <div class="banner-slide"><img src="img/baner/baner5.webp" alt="Promoción 5"></div>
+            <div class="banner-slide"><img src="img/baner/baner6.webp" alt="Promoción 6"></div>
+          </div>
+          <div class="banner-dots" id="banner-dots"></div>
+        </section>
+
+        </nav> <div class="ticker-wrapper">
+            <div class="ticker-text">
+                 <span>AUTOSERVICIO LA QUINTA APP</span>
+                <span>Envío Gratis En Compras Superiores A $150.000 ✨</span>
+                <span>Descuentos Del 20% En Productos Seleccionados solo En Nuestra App 🔥</span>
+                <span>Nuevos Productos Ya Disponibles 🚀</span>
+                 <span>AUTOSERVICIO LA QUINTA APP</span>
+                <span>Descuentos Del 20% En Productos Seleccionados solo En Nuestra App 🔥</span>
+                <span>Nuevos Productos Ya Disponibles 🚀</span>
+                <span>AUTOSERVICIO LA QUINTA APP 🚀</span>
+                 <span>AUTOSERVICIO LA QUINTA APP</span>
+                <span>Envío Gratis En Compras Superiores A $150.000 ✨</span>
+                <span>Descuentos Del 20% En Productos Seleccionados solo En Nuestra App 🔥</span>
+                <span>Nuevos Productos Ya Disponibles 🚀</span>
+                 <span>AUTOSERVICIO LA QUINTA APP</span>
+                <span>Descuentos Del 20% En Productos Seleccionados solo En Nuestra App 🔥</span>
+                <span>Nuevos Productos Ya Disponibles 🚀</span>
+                <span>AUTOSERVICIO LA QUINTA APP 🚀</span>
+            </div>
+        </div>
+
+        <nav class="menu-container">
+            <div class="category-carousel-container">
+                <div id="category-carousel" class="category-carousel"></div>
+            </div>
+        </nav>
+
+        <main class="menu-container">
+            <section id="filtered-section" class="menu-section" style="display:none;">
+                <h2 id="search-results-title" class="section-title">Resultados</h2>
+                <div id="no-products-message" class="empty-cart-msg" style="display:none;">No se encontraron productos.</div>
+                <div id="all-filtered-products" class="product-grid"></div>
+                <div id="pagination-container"></div>
+            </section>
+
+            <section id="featured-section" class="menu-section">
+                <h2 class="section-title">Productos Destacados</h2>
+                <div id="featured-grid" class="product-grid"></div>
+            </section>
+
+            <!-- Publicidad -->
+            <section id="ads-section" class="ads-section">
+            <div class="ads-grid">
+                <img src="https://carulla.vtexassets.com/assets/vtex.file-manager-graphql/images/68a6fc85-d26d-4396-b1e4-70c8660dd7ed___bbbe48d16dff48707880b105f57e78de.jpg" alt="Publicidad 1"          class="ad-image" data-product-id="6fbce90e-440e-4e18-81e3-51c5fad0b4a1">
+                <img src="https://carulla.vtexassets.com/assets/vtex.file-manager-graphql/images/b4a9de34-d999-4a28-be0c-d52f722e3b03___cec686d8e2179846c866939bb5386d8c.jpg" alt="Publicidad 2"          class="ad-image" data-product-id="728b36cf-6b4d-4f50-8c99-ccde786cf031">
+                <img src="https://carulla.vtexassets.com/assets/vtex.file-manager-graphql/images/5b05f0a9-ef81-4e4b-ac9b-acc5b789c1a3___b9da3ad3b93e3fffadbaf76de2c5aadb.jpg" alt="Publicidad 3"          class="ad-image" data-product-id="7ee78632-0644-4135-8844-ca380201fe96">
+                <img src="https://carulla.vtexassets.com/assets/vtex.file-manager-graphql/images/e8f9484c-bdc3-497c-a0e6-dc07be8c485f___3658435ecdde8e9c901fe2f542472785.jpg" alt="Publicidad 4"          class="ad-image" data-product-id="9c6280ad-e209-441b-b750-7a152c038b38">
+            </div>
+            </section>
+
+
+            <section id="offers-section" class="menu-section">
+                <h2 class="section-title">Ofertas Exclusivas</h2>
+                <div id="offers-grid" class="product-grid"></div>
+            </section>
+        </main>
+
+        <div id="productModal" class="modal" aria-hidden="true">
+            <div class="modal-content-wrapper">
+                <div class="modal-card">
+                    <button class="modal-close close-button" aria-label="Cerrar">&times;</button>
+                    <div class="carousel-container">
+                        <button id="prev-btn" class="carousel-btn prev-btn"><i class="fas fa-circle-arrow-left"></i></button>
+                        <div id="carousel-images-container" class="carousel-images-container"></div>
+                        <button id="next-btn" class="carousel-btn next-btn"><i class="fas fa-circle-arrow-right"></i></button>
+                    </div>
+                    <div id="image-modal-caption" class="modal-caption">
+                        <h3 id="modal-product-name"></h3>
+                        <p id="modal-product-description"></p>
+                        <p id="modal-product-price" class="price"></p>
+                        <div class="qty-row">
+                            <label for="qty-input">Cantidad</label>
+                            <input id="qty-input" type="number" min="1" value="1" />
+                        </div>
+                        <button id="modal-add-to-cart-btn" class="add-to-cart-btn">Añadir al carrito</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="cartModal" class="modal" aria-hidden="true">
+            <div class="modal-content-wrapper">
+                <div class="cart-modal-card">
+                    <button class="modal-close close-cart-btn" aria-label="Cerrar">&times;</button>
+                    <h3>Tu pedido</h3>
+                    <div id="cart-items" class="cart-items"></div>
+                    <div class="cart-summary">
+                        <strong>Total: $<span id="cart-total">0</span></strong>
+                    </div>
+                    <button id="checkout-btn" class="checkout-btn"><i class="fab fa-whatsapp"></i> Hacer Pedido</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="checkoutModal" class="modal" aria-hidden="true">
+          <div class="modal-content-wrapper">
+            <div class="checkout-modal-card">
+              <button class="modal-close close-checkout-btn">&times;</button>
+              <h2>Datos de entrega</h2>
+              <div class="form-group">
+                <label for="customer-name">Nombre:</label>
+                <input type="text" id="customer-name" placeholder="Tu nombre" required>
+              </div>
+              <div class="form-group">
+                <label for="customer-address">Dirección:</label>
+                <input type="text" id="customer-address" placeholder="Tu dirección de entrega" required>
+              </div>
+              <label>Método de pago:</label>
+              <div>
+                  <label><input type="radio" name="payment"         value="Efectivo" checked> Efectivo</label>
+                  <label><input type="radio" name="payment"         value="Transferencia"> Transferencia</label       >
+              </div>
+      
+      
+              <button id="finalize-btn" class="checkout-btn">Continuar</button>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer-menu">
+            <p>&copy; <span id="year"></span> Todos los derechos reservados - Autoservicio La Quinta</p>
+        </footer>
+    </div>
+
+    <div id="install-banner" class="install-banner" hidden>
+        <span>Añadir a pantalla de inicio</span>
+        <div>
+            <button id="install-close-btn">No</button>
+            <button id="install-prompt-btn" class="install-btn">Instalar</button>
+        </div>
+    </div>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(()=>{});
+      }
+      document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
