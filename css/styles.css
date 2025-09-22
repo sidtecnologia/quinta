@@ -698,3 +698,23 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Estado agotado */
+.product-card.out-of-stock {
+  opacity: 0.5;
+  position: relative;
+  pointer-events: none; /* evita que se pueda abrir modal o añadir al carrito */
+}
+
+.out-of-stock-overlay {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 0, 0, 0.8);
+  color: #fff;
+  font-weight: bold;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}

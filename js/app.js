@@ -175,10 +175,19 @@ const generateProductCard = (p) => {
     if (p.bestSeller) {
         bestSellerTag = `<div class="best-seller-tag">Lo más vendido</div>`;
     }
+
+    let stockOverlay = '';
+    let stockClass = '';
+    if (!p.stock || p.stock <= 0) {
+        stockOverlay = `<div class="out-of-stock-overlay">Agotado</div>`;
+        stockClass = ' out-of-stock';
+    }
+
     return `
-      <div class="product-card" data-product-id="${p.id}">
+      <div class="product-card${stockClass}" data-product-id="${p.id}">
         ${bestSellerTag}
         <img src="${p.image[0]}" alt="${p.name}" class="product-image modal-trigger" data-id="${p.id}" loading="lazy" />
+        ${stockOverlay}
         <div class="product-info">
           <div>
             <div class="product-name">${p.name}</div>
@@ -191,6 +200,7 @@ const generateProductCard = (p) => {
       </div>
     `;
 };
+
 
 // --- Renderizado con paginación ---
 function renderProducts(container, data, page = 1, perPage = 20, withPagination = false) {
