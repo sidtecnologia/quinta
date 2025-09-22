@@ -446,15 +446,28 @@ function updateCart() {
 function addToCart(id, qty = 1) {
     const p = products.find(x => x.id === id);
     if (!p) return;
-    const existing = cart.find(i => i.id === id);
-    if (existing) existing.qty += qty;
-    else cart.push({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        qty,
-        image: p.image[0]
-    });
+
+    // Verificar si hay suficiente stock
+    const availableStock = p.stock || 0;
+    const existingInCart = cart.find(i => i.id === id);
+    const currentQtyInCart = existingInCart ? existingInCart.qty : 0;
+    
+    if (currentQtyInCart + qty > availableStock) {
+        alert(`No hay suficiente stock para ${p.name}. Solo quedan ${availableStock} unidades.`);
+        return;
+    }
+
+    if (existingInCart) {
+        existingInCart.qty += qty;
+    } else {
+        cart.push({
+            id: p.id,
+            name: p.name,
+            price: p.price,
+            qty,
+            image: p.image[0]
+        });
+    }
     updateCart();
 }
 
@@ -463,10 +476,20 @@ cartItemsContainer.addEventListener('click', (e) => {
     if (!btn) return;
     const idx = parseInt(btn.dataset.idx, 10);
     const op = btn.dataset.op;
-    if (op === 'inc') cart[idx].qty++;
+
+    const productInCart = cart[idx];
+    const originalProduct = products.find(p => p.id === productInCart.id);
+
+    if (op === 'inc') {
+        if ((productInCart.qty + 1) > (originalProduct.stock || 0)) {
+            alert(`No hay suficiente stock para ${productInCart.name}. Solo quedan ${originalProduct.stock} unidades.`);
+            return;
+        }
+        productInCart.qty++;
+    }
     if (op === 'dec') {
-        cart[idx].qty--;
-        if (cart[idx].qty <= 0) cart.splice(idx, 1);
+        productInCart.qty--;
+        if (productInCart.qty <= 0) cart.splice(idx, 1);
     }
     updateCart();
 });
@@ -484,7 +507,7 @@ checkoutBtn.addEventListener('click', () => {
     showModal(checkoutModal);
 });
 
-finalizeBtn.addEventListener('click', () => {
+finalizeBtn.addEventListener('click', async () => {
     const name = customerNameInput.value.trim();
     const address = customerAddressInput.value.trim();
     const payment = document.querySelector('input[name="payment"]:checked')?.value || '';
@@ -492,18 +515,67 @@ finalizeBtn.addEventListener('click', () => {
         alert('Por favor completa nombre y dirección');
         return;
     }
-    const whatsappNumber = '573227671829';
-    let message = `Hola, mi nombre es *${encodeURIComponent(name)}*.%0A%0AQuisiera hacer el siguiente pedido para entregar en la dirección: *${encodeURIComponent(address)}*.%0A%0AMétodo de pago: *${encodeURIComponent(payment)}*.%0A%0A--- MI PEDIDO ---%0A`;
-    let total = 0;
-    cart.forEach(item => {
-        message += `- ${encodeURIComponent(item.name)} x${item.qty} = $${money(item.price * item.qty)}%0A`;
-        total += item.price * item.qty;
-    });
-    message += `%0ATotal: $${money(total)}`;
-    const link = `https://wa.me/${whatsappNumber}?text=${message}`;
-    window.open(link, '_blank');
-    closeModal(checkoutModal);
-    closeModal(cartModal);
+
+    try {
+        // 1. Verificar y actualizar stock
+        const updates = cart.map(item => {
+            const product = products.find(p => p.id === item.id);
+            if (!product || product.stock < item.qty) {
+                throw new Error(`No hay suficiente stock para ${item.name}. Stock disponible: ${product.stock}`);
+            }
+            const newStock = product.stock - item.qty;
+            return supabaseClient
+                .from('products')
+                .update({ stock: newStock })
+                .eq('id', item.id);
+        });
+
+        // Esperar a que todas las actualizaciones de stock se completen
+        const results = await Promise.all(updates);
+        results.forEach(result => {
+            if (result.error) {
+                throw new Error('Error al actualizar el stock: ' + result.error.message);
+            }
+        });
+
+        // 2. Guardar el pedido en la base de datos
+        const orderData = {
+            customer_name: name,
+            customer_address: address,
+            payment_method: payment,
+            total_amount: cart.reduce((acc, item) => acc + item.price * item.qty, 0),
+            order_items: cart, // Guarda el detalle de los productos en el pedido
+            order_status: 'Pendiente'
+        };
+        const { error: orderError } = await supabaseClient.from('orders').insert([orderData]);
+        if (orderError) {
+            throw new Error('Error al guardar el pedido: ' + orderError.message);
+        }
+
+        // 3. Si todo es exitoso, generar el mensaje de WhatsApp y limpiar
+        const whatsappNumber = '573227671829';
+        let message = `Hola mi nombre es ${encodeURIComponent(name)}.%0AHe realizado un pedido para la dirección ${encodeURIComponent(address)} con pago en ${encodeURIComponent(payment)}.%0A%0A--- Mi pedido es: ---%0A`;
+        let total = 0;
+        cart.forEach(item => {
+            message += `- ${encodeURIComponent(item.name)} x${item.qty} = $${money(item.price * item.qty)}%0A`;
+            total += item.price * item.qty;
+        });
+        message += `%0ATotal: $${money(total)}`;
+        const link = `https://wa.me/${whatsappNumber}?text=${message}`;
+        window.open(link, '_blank');
+
+        cart = [];
+        updateCart(); // Actualiza la vista del carrito
+        closeModal(checkoutModal);
+        closeModal(cartModal);
+        
+        // Re-fetch products to update the stock in the client view
+        products = await fetchProductsFromSupabase();
+
+    } catch (error) {
+        alert('Error al procesar el pedido: ' + error.message);
+        console.error('Fallo en el pedido:', error);
+    }
 });
 
 window.addEventListener('beforeinstallprompt', (e) => {
