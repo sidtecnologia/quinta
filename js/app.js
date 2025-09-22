@@ -579,8 +579,14 @@ finalizeBtn.addEventListener('click', async () => {
         closeModal(checkoutModal);
         closeModal(cartModal);
         
-        // Re-fetch products to update the stock in the client view
-        products = await fetchProductsFromSupabase();
+        document.addEventListener('DOMContentLoaded', () => {
+  // carga inicial
+  fetchProducts();
+
+  // recargar cada 3 segundos
+  setInterval(fetchProducts, 3000);
+});
+
 
     } catch (error) {
         alert('Error al procesar el pedido: ' + error.message);
