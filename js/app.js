@@ -69,6 +69,8 @@ const orderSuccessModal = document.getElementById('orderSuccessModal');
 const orderSuccessTotal = document.getElementById('order-success-total');
 const whatsappBtn = document.getElementById('whatsapp-btn');
 const closeSuccessBtn = document.getElementById('close-success-btn');
+// NUEVO: Referencia al checkbox de consentimiento
+const termsConsentCheckbox = document.getElementById('terms-consent-checkbox');
 
 
 // --- Funciones de Ayuda ---
@@ -531,6 +533,13 @@ finalizeBtn.addEventListener('click', async () => {
     const name = customerNameInput.value.trim();
     const address = customerAddressInput.value.trim();
     const payment = document.querySelector('input[name="payment"]:checked')?.value || '';
+    
+    // NUEVO: Verificación del consentimiento antes de procesar
+    if (!termsConsentCheckbox.checked) {
+        alert('Debes aceptar los Términos y Condiciones y la Política de Privacidad para continuar.');
+        return;
+    }
+
     if (!name || !address) {
         alert('Por favor completa nombre y dirección');
         return;

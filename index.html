@@ -154,6 +154,14 @@
                   <label><input type="radio" name="payment" value="Efectivo" checked> Efectivo</label>
                   <label><input type="radio" name="payment" value="Transferencia"> Transferencia</label>
               </div>
+              
+              <div class="terms-consent">
+                  <input type="checkbox" id="terms-consent-checkbox" required>
+                  <label for="terms-consent-checkbox">
+                      Acepto los <a href="./privacy/index.html" target="_blank">Términos y Condiciones y la Política de Privacidad</a>
+                  </label>
+              </div>
+              
               <button id="finalize-btn" class="checkout-btn">Finalizar Pedido</button>
             </div>
           </div>
@@ -163,12 +171,13 @@
           <div class="modal-content-wrapper">
             <div class="success-modal-card">
               <button class="modal-close close-success-btn">&times;</button>
-              <h2>¡Pedido recibido con éxito!</h2>
+              <h2>¡Pedido realizado con éxito!</h2>
               <p id="order-success-description"></p>
               <p><strong>Total:</strong> $<span id="order-success-total"></span></p>
-              <p>Gracias por elegirnos. Luego de confirmar el pago tu pedido llegará en el transcurso de un par de horas.</p>
+              <p>Luego de confirmar el pago tu pedido llegará en el transcurso de un par de horas.</p>
+              <p>Gracias por tu compra.</p>
               <button id="whatsapp-btn" class="checkout-btn"><i class="fab fa-whatsapp"></i> Confirmar pago</button>
-              <button id="close-success-btn" class="add-to-cart-btn" style="background:#666">Cancelar</button>
+              <button id="close-success-btn" class="add-to-cart-btn" style="background:#666">Cerrar</button>
             </div>
           </div>
         </div>
