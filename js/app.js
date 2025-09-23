@@ -529,12 +529,14 @@ checkoutBtn.addEventListener('click', () => {
     showModal(checkoutModal);
 });
 
-finalizeBtn.addEventListener('click', async () => {
+// MODIFICADO: Este botón ahora solo prepara los datos y muestra el modal de éxito.
+// Las operaciones de la base de datos se movieron a la función del botón de WhatsApp.
+finalizeBtn.addEventListener('click', () => {
     const name = customerNameInput.value.trim();
     const address = customerAddressInput.value.trim();
     const payment = document.querySelector('input[name="payment"]:checked')?.value || '';
     
-    // NUEVO: Verificación del consentimiento antes de procesar
+    // Verificación del consentimiento antes de continuar
     if (!termsConsentCheckbox.checked) {
         alert('Debes aceptar los Términos y Condiciones y la Política de Privacidad para continuar.');
         return;
@@ -545,9 +547,38 @@ finalizeBtn.addEventListener('click', async () => {
         return;
     }
 
+    // Guardar los detalles para el mensaje de WhatsApp y la confirmación
+    orderDetails = {
+        name,
+        address,
+        payment,
+        items: [...cart],
+        total: cart.reduce((acc, item) => acc + item.price * item.qty, 0)
+    };
+
+    closeModal(checkoutModal);
+    closeModal(cartModal);
+    showOrderSuccessModal();
+});
+
+function showOrderSuccessModal() {
+    if (orderDetails.total) {
+        orderSuccessTotal.textContent = money(orderDetails.total);
+    }
+    showModal(orderSuccessModal);
+}
+
+// MODIFICADO: Este botón ahora se encarga de las operaciones de la base de datos
+// antes de redirigir a WhatsApp.
+whatsappBtn.addEventListener('click', async () => {
+    if (Object.keys(orderDetails).length === 0) {
+        alert('No hay detalles del pedido para enviar.');
+        return;
+    }
+
     try {
         // 1. Verificar y actualizar stock
-        const updates = cart.map(item => {
+        const updates = orderDetails.items.map(item => {
             const product = products.find(p => p.id === item.id);
             if (!product || product.stock < item.qty) {
                 throw new Error(`No hay suficiente stock para ${item.name}. Stock disponible: ${product.stock}`);
@@ -569,11 +600,11 @@ finalizeBtn.addEventListener('click', async () => {
 
         // 2. Guardar el pedido en la base de datos
         const orderData = {
-            customer_name: name,
-            customer_address: address,
-            payment_method: payment,
-            total_amount: cart.reduce((acc, item) => acc + item.price * item.qty, 0),
-            order_items: cart, // Guarda el detalle de los productos en el pedido
+            customer_name: orderDetails.name,
+            customer_address: orderDetails.address,
+            payment_method: orderDetails.payment,
+            total_amount: orderDetails.total,
+            order_items: orderDetails.items,
             order_status: 'Pendiente'
         };
         const { error: orderError } = await supabaseClient.from('orders').insert([orderData]);
@@ -581,48 +612,26 @@ finalizeBtn.addEventListener('click', async () => {
             throw new Error('Error al guardar el pedido: ' + orderError.message);
         }
 
-        // 3. Si todo es exitoso, guardar los detalles para el mensaje de WhatsApp y mostrar la confirmación
-        orderDetails = {
-            name,
-            address,
-            payment,
-            items: [...cart],
-            total: orderData.total_amount
-        };
-
-        cart = [];
-        updateCart(); // Actualiza la vista del carrito
-        closeModal(checkoutModal);
-        closeModal(cartModal);
-        showOrderSuccessModal();
+        // Si todo es exitoso, generar el enlace de WhatsApp y limpiar el carrito
+        const whatsappNumber = '573227671829';
+        let message = `Hola mi nombre es ${encodeURIComponent(orderDetails.name)}.%0AHe realizado un pedido para la dirección ${encodeURIComponent(orderDetails.address)} quiero confirmar el pago en ${encodeURIComponent(orderDetails.payment)}.%0A%0A--- Mi pedido es: ---%0A`;
+        orderDetails.items.forEach(item => {
+            message += `- ${encodeURIComponent(item.name)} x${item.qty} = $${money(item.price * item.qty)}%0A`;
+        });
+        message += `%0ATotal: $${money(orderDetails.total)}`;
+        const link = `https://wa.me/${whatsappNumber}?text=${message}`;
+        window.open(link, '_blank');
+        
+        // Limpiar carrito y detalles del pedido después de enviar
+        cart = []; 
+        orderDetails = {}; 
+        updateCart(); 
+        closeModal(orderSuccessModal);
 
     } catch (error) {
         alert('Error al procesar el pedido: ' + error.message);
         console.error('Fallo en el pedido:', error);
     }
-});
-
-function showOrderSuccessModal() {
-    if (orderDetails.total) {
-        orderSuccessTotal.textContent = money(orderDetails.total);
-    }
-    showModal(orderSuccessModal);
-}
-
-whatsappBtn.addEventListener('click', () => {
-    if (Object.keys(orderDetails).length === 0) {
-        alert('No hay detalles del pedido para enviar.');
-        return;
-    }
-    const whatsappNumber = '573227671829';
-    let message = `Hola mi nombre es ${encodeURIComponent(orderDetails.name)}.%0AHe realizado un pedido para la dirección ${encodeURIComponent(orderDetails.address)} quiero confirmar el pago en ${encodeURIComponent(orderDetails.payment)}.%0A%0A--- Mi pedido es: ---%0A`;
-    orderDetails.items.forEach(item => {
-        message += `- ${encodeURIComponent(item.name)} x${item.qty} = $${money(item.price * item.qty)}%0A`;
-    });
-    message += `%0ATotal: $${money(orderDetails.total)}`;
-    const link = `https://wa.me/${whatsappNumber}?text=${message}`;
-    window.open(link, '_blank');
-    orderDetails = {}; // Limpiar los detalles después de enviar
 });
 
 window.addEventListener('beforeinstallprompt', (e) => {
