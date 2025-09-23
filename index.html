@@ -30,11 +30,8 @@
             </button>
         </nav>
 
-        
-
         <section class="main-carousel-wrapper">
 
-        <!-- Banner de promociones -->
         <section class="banner-section">
           <div class="banner-carousel" id="banner-carousel">
             <div class="banner-slide"><img src="img/baner/baner1.webp" alt="Promoción 1"></div>
@@ -87,7 +84,6 @@
                 <div id="featured-grid" class="product-grid"></div>
             </section>
 
-            <!-- Publicidad -->
             <section id="ads-section" class="ads-section">
             <div class="ads-grid">
                 <img src="https://carulla.vtexassets.com/assets/vtex.file-manager-graphql/images/68a6fc85-d26d-4396-b1e4-70c8660dd7ed___bbbe48d16dff48707880b105f57e78de.jpg" alt="Publicidad 1"          class="ad-image" data-product-id="6fbce90e-440e-4e18-81e3-51c5fad0b4a1">
@@ -96,7 +92,6 @@
                 <img src="https://carulla.vtexassets.com/assets/vtex.file-manager-graphql/images/e8f9484c-bdc3-497c-a0e6-dc07be8c485f___3658435ecdde8e9c901fe2f542472785.jpg" alt="Publicidad 4"          class="ad-image" data-product-id="9c6280ad-e209-441b-b750-7a152c038b38">
             </div>
             </section>
-
 
             <section id="offers-section" class="menu-section">
                 <h2 class="section-title">Ofertas Exclusivas</h2>
@@ -136,7 +131,7 @@
                     <div class="cart-summary">
                         <strong>Total: $<span id="cart-total">0</span></strong>
                     </div>
-                    <button id="checkout-btn" class="checkout-btn"><i class="fab fa-whatsapp"></i> Hacer Pedido</button>
+                    <button id="checkout-btn" class="checkout-btn">Hacer Pedido</button>
                 </div>
             </div>
         </div>
@@ -156,12 +151,24 @@
               </div>
               <label>Método de pago:</label>
               <div>
-                  <label><input type="radio" name="payment"         value="Efectivo" checked> Efectivo</label>
-                  <label><input type="radio" name="payment"         value="Transferencia"> Transferencia</label       >
+                  <label><input type="radio" name="payment" value="Efectivo" checked> Efectivo</label>
+                  <label><input type="radio" name="payment" value="Transferencia"> Transferencia</label>
               </div>
-      
-      
-              <button id="finalize-btn" class="checkout-btn">Continuar</button>
+              <button id="finalize-btn" class="checkout-btn">Finalizar Pedido</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="orderSuccessModal" class="modal" aria-hidden="true">
+          <div class="modal-content-wrapper">
+            <div class="success-modal-card">
+              <button class="modal-close close-success-btn">&times;</button>
+              <h2>¡Pedido realizado con éxito!</h2>
+              <p id="order-success-description"></p>
+              <p><strong>Total:</strong> $<span id="order-success-total"></span></p>
+              <p>Gracias por tu compra. Tu pedido llegará en el transcurso de un par de horas.</p>
+              <button id="whatsapp-btn" class="checkout-btn"><i class="fab fa-whatsapp"></i> Enviar por WhatsApp</button>
+              <button id="close-success-btn" class="add-to-cart-btn" style="background:#666">Cerrar</button>
             </div>
           </div>
         </div>

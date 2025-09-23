@@ -30,6 +30,7 @@ let currentImageIndex = 0;
 let currentProduct = null;
 let deferredPrompt = null;
 const PRODUCTS_PER_PAGE = 25;
+let orderDetails = {};
 
 // --- Referencias del DOM ---
 const featuredContainer = document.getElementById('featured-grid');
@@ -64,6 +65,11 @@ const finalizeBtn = document.getElementById('finalize-btn');
 const installBanner = document.getElementById('install-banner');
 const installCloseBtn = document.getElementById('install-close-btn');
 const installPromptBtn = document.getElementById('install-prompt-btn');
+const orderSuccessModal = document.getElementById('orderSuccessModal');
+const orderSuccessTotal = document.getElementById('order-success-total');
+const whatsappBtn = document.getElementById('whatsapp-btn');
+const closeSuccessBtn = document.getElementById('close-success-btn');
+
 
 // --- Funciones de Ayuda ---
 const money = (v) => {
@@ -362,7 +368,7 @@ function closeModal(modal) {
     modal.setAttribute('aria-hidden', 'true');
 }
 
-[productModal, cartModal, checkoutModal].forEach(modal => {
+[productModal, cartModal, checkoutModal, orderSuccessModal].forEach(modal => {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             closeModal(modal);
@@ -371,6 +377,10 @@ function closeModal(modal) {
             closeModal(modal);
         }
     });
+});
+
+closeSuccessBtn.addEventListener('click', () => {
+    closeModal(orderSuccessModal);
 });
 
 function openProductModal(id) {
@@ -562,36 +572,48 @@ finalizeBtn.addEventListener('click', async () => {
             throw new Error('Error al guardar el pedido: ' + orderError.message);
         }
 
-        // 3. Si todo es exitoso, generar el mensaje de WhatsApp y limpiar
-        const whatsappNumber = '573227671829';
-        let message = `Hola mi nombre es ${encodeURIComponent(name)}.%0AHe realizado un pedido para la dirección ${encodeURIComponent(address)} con pago en ${encodeURIComponent(payment)}.%0A%0A--- Mi pedido es: ---%0A`;
-        let total = 0;
-        cart.forEach(item => {
-            message += `- ${encodeURIComponent(item.name)} x${item.qty} = $${money(item.price * item.qty)}%0A`;
-            total += item.price * item.qty;
-        });
-        message += `%0ATotal: $${money(total)}`;
-        const link = `https://wa.me/${whatsappNumber}?text=${message}`;
-        window.open(link, '_blank');
+        // 3. Si todo es exitoso, guardar los detalles para el mensaje de WhatsApp y mostrar la confirmación
+        orderDetails = {
+            name,
+            address,
+            payment,
+            items: [...cart],
+            total: orderData.total_amount
+        };
 
         cart = [];
         updateCart(); // Actualiza la vista del carrito
         closeModal(checkoutModal);
         closeModal(cartModal);
-        
-        document.addEventListener('DOMContentLoaded', () => {
-  // carga inicial
-  fetchProducts();
-
-  // recargar cada 3 segundos
-  setInterval(fetchProducts, 3000);
-});
-
+        showOrderSuccessModal();
 
     } catch (error) {
         alert('Error al procesar el pedido: ' + error.message);
         console.error('Fallo en el pedido:', error);
     }
+});
+
+function showOrderSuccessModal() {
+    if (orderDetails.total) {
+        orderSuccessTotal.textContent = money(orderDetails.total);
+    }
+    showModal(orderSuccessModal);
+}
+
+whatsappBtn.addEventListener('click', () => {
+    if (Object.keys(orderDetails).length === 0) {
+        alert('No hay detalles del pedido para enviar.');
+        return;
+    }
+    const whatsappNumber = '573227671829';
+    let message = `Hola mi nombre es ${encodeURIComponent(orderDetails.name)}.%0AHe realizado un pedido para la dirección ${encodeURIComponent(orderDetails.address)} con pago en ${encodeURIComponent(orderDetails.payment)}.%0A%0A--- Mi pedido es: ---%0A`;
+    orderDetails.items.forEach(item => {
+        message += `- ${encodeURIComponent(item.name)} x${item.qty} = $${money(item.price * item.qty)}%0A`;
+    });
+    message += `%0ATotal: $${money(orderDetails.total)}`;
+    const link = `https://wa.me/${whatsappNumber}?text=${message}`;
+    window.open(link, '_blank');
+    orderDetails = {}; // Limpiar los detalles después de enviar
 });
 
 window.addEventListener('beforeinstallprompt', (e) => {
