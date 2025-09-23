@@ -655,6 +655,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (products.length > 0) {
         showDefaultSections();
         generateCategoryCarousel();
+        setInterval(fetchOrders, 3000);
     }
     updateCart();
 });
