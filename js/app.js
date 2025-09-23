@@ -606,7 +606,7 @@ whatsappBtn.addEventListener('click', () => {
         return;
     }
     const whatsappNumber = '573227671829';
-    let message = `Hola mi nombre es ${encodeURIComponent(orderDetails.name)}.%0AHe realizado un pedido para la dirección ${encodeURIComponent(orderDetails.address)} con pago en ${encodeURIComponent(orderDetails.payment)}.%0A%0A--- Mi pedido es: ---%0A`;
+    let message = `Hola mi nombre es ${encodeURIComponent(orderDetails.name)}.%0AHe realizado un pedido para la dirección ${encodeURIComponent(orderDetails.address)} quiero confirmar el pago en ${encodeURIComponent(orderDetails.payment)}.%0A%0A--- Mi pedido es: ---%0A`;
     orderDetails.items.forEach(item => {
         message += `- ${encodeURIComponent(item.name)} x${item.qty} = $${money(item.price * item.qty)}%0A`;
     });
@@ -655,7 +655,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (products.length > 0) {
         showDefaultSections();
         generateCategoryCarousel();
-        setInterval(fetchOrders, 3000);
     }
     updateCart();
 });
