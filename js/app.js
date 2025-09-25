@@ -5,11 +5,11 @@
  */
 
 // --- Configuración de API (Supabase Edge Functions) ---
-const API_BASE = "https://nqjekbyyvqrevbcehhob.functions.supabase.co";
+const API_BASE = "https://nqjekbyyvqrevbcehhob.functions.supabase.co"; // <- tu dominio real
+
 // --- Variables de estado ---
 let cart = [];
 let products = [];
-let currentProduct = null;
 let orderDetails = {};
 const PRODUCTS_PER_PAGE = 25;
 
@@ -24,32 +24,18 @@ const noProductsMessage = document.getElementById("no-products-message");
 const searchInput = document.getElementById("search-input");
 const searchResultsTitle = document.getElementById("search-results-title");
 const categoryCarousel = document.getElementById("category-carousel");
-const productModal = document.getElementById("productModal");
-const modalProductName = document.getElementById("modal-product-name");
-const modalProductDescription = document.getElementById("modal-product-description");
-const modalProductPrice = document.getElementById("modal-product-price");
-const modalAddToCartBtn = document.getElementById("modal-add-to-cart-btn");
-const qtyInput = document.getElementById("qty-input");
-const carouselImagesContainer = document.getElementById("carousel-images-container");
-const prevBtn = document.getElementById("prev-btn");
-const nextBtn = document.getElementById("next-btn");
-const cartBtn = document.getElementById("cart-btn");
 const cartBadge = document.getElementById("cart-badge");
-const cartModal = document.getElementById("cartModal");
 const cartItemsContainer = document.getElementById("cart-items");
 const cartTotalElement = document.getElementById("cart-total");
-const checkoutBtn = document.getElementById("checkout-btn");
-const checkoutModal = document.getElementById("checkoutModal");
 const customerNameInput = document.getElementById("customer-name");
 const customerAddressInput = document.getElementById("customer-address");
 const finalizeBtn = document.getElementById("finalize-btn");
 const orderSuccessModal = document.getElementById("orderSuccessModal");
 const orderSuccessTotal = document.getElementById("order-success-total");
 const whatsappBtn = document.getElementById("whatsapp-btn");
-const closeSuccessBtn = document.getElementById("close-success-btn");
 const termsConsentCheckbox = document.getElementById("terms-consent-checkbox");
 
-// --- Funciones de ayuda ---
+// --- Utilidades ---
 const money = (v) => Math.floor(v).toLocaleString("es-CO");
 
 const shuffleArray = (array) => {
@@ -60,7 +46,7 @@ const shuffleArray = (array) => {
   return array;
 };
 
-// --- Renderizado de productos ---
+// --- Renderizado ---
 const generateProductCard = (p) => {
   let bestSellerTag = p.bestSeller ? `<div class="best-seller-tag">Lo más vendido</div>` : "";
   let stockOverlay = !p.stock || p.stock <= 0 ? `<div class="out-of-stock-overlay">Agotado</div>` : "";
@@ -151,8 +137,7 @@ function updateCart() {
     cartTotalElement.textContent = money(0);
     return;
   }
-  let total = 0,
-    totalItems = 0;
+  let total = 0, totalItems = 0;
   cart.forEach((item, idx) => {
     total += item.price * item.qty;
     totalItems += item.qty;
@@ -231,7 +216,7 @@ whatsappBtn.addEventListener("click", async () => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Error al guardar pedido");
 
-    // Generar mensaje WhatsApp
+    // Mensaje WhatsApp
     const whatsappNumber = "573227671829";
     let message = `Hola, mi nombre es ${encodeURIComponent(orderDetails.name)}.%0AHe realizado un pedido para ${encodeURIComponent(orderDetails.address)} en ${encodeURIComponent(orderDetails.payment)}.%0A--- Pedido ---%0A`;
     orderDetails.items.forEach((item) => {
@@ -249,7 +234,7 @@ whatsappBtn.addEventListener("click", async () => {
   }
 });
 
-// --- Fetch de productos desde Edge Function ---
+// --- Fetch de productos ---
 async function fetchProductsFromAPI() {
   try {
     const res = await fetch(`${API_BASE}/get-products`);
@@ -263,7 +248,7 @@ async function fetchProductsFromAPI() {
   }
 }
 
-// --- Inicializar ---
+// --- Inicialización ---
 document.addEventListener("DOMContentLoaded", async () => {
   products = await fetchProductsFromAPI();
   if (products.length > 0) {
