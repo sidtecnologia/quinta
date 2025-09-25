@@ -5,7 +5,7 @@
  */
 
 // --- Configuración de API (Supabase Edge Functions) ---
-const API_BASE = "https://<nqjekbyyvqrevbcehhob>.functions.supabase.co";
+const API_BASE = "https://nqjekbyyvqrevbcehhob.functions.supabase.co";
 // --- Variables de estado ---
 let cart = [];
 let products = [];
