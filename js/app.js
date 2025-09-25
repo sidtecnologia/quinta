@@ -14,15 +14,6 @@
  * Para más información, contactar a: sidsoporte@proton.me
  */
 
-// Importa el cliente de Supabase (asume que ya está en tu HTML)
-const { createClient } = supabase;
-
-// --- Configuración de Supabase ---
-// Reemplaza 'TU_SUPABASE_ANON_KEY_AQUI' con la clave de tu proyecto
-const SUPABASE_URL = 'https://nqjekbyyvqrevbcehhob.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xamVrYnl5dnFyZXZiY2VoaG9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MzE4MTEsImV4cCI6MjA3NDAwNzgxMX0.U-zb7wcX3qYeAoRH3MM2FVj9ZZzODsdvjj9wNWg_h74';
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 // --- Variables de estado ---
 let cart = [];
 let products = []; // Aquí se almacenarán los productos de la API
@@ -577,42 +568,22 @@ whatsappBtn.addEventListener('click', async () => {
     }
 
     try {
-        // 1. Verificar y actualizar stock
-        const updates = orderDetails.items.map(item => {
-            const product = products.find(p => p.id === item.id);
-            if (!product || product.stock < item.qty) {
-                throw new Error(`No hay suficiente stock para ${item.name}. Stock disponible: ${product.stock}`);
-            }
-            const newStock = product.stock - item.qty;
-            return supabaseClient
-                .from('products')
-                .update({ stock: newStock })
-                .eq('id', item.id);
+        // NUEVA LÓGICA: Enviar el pedido completo a la API de Vercel para procesarlo de forma segura
+        const response = await fetch('/api/order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderDetails),
         });
 
-        // Esperar a que todas las actualizaciones de stock se completen
-        const results = await Promise.all(updates);
-        results.forEach(result => {
-            if (result.error) {
-                throw new Error('Error al actualizar el stock: ' + result.error.message);
-            }
-        });
+        const result = await response.json();
 
-        // 2. Guardar el pedido en la base de datos
-        const orderData = {
-            customer_name: orderDetails.name,
-            customer_address: orderDetails.address,
-            payment_method: orderDetails.payment,
-            total_amount: orderDetails.total,
-            order_items: orderDetails.items,
-            order_status: 'Pendiente'
-        };
-        const { error: orderError } = await supabaseClient.from('orders').insert([orderData]);
-        if (orderError) {
-            throw new Error('Error al guardar el pedido: ' + orderError.message);
+        if (!response.ok) {
+            throw new Error(result.error || 'Error al procesar el pedido.');
         }
 
-        // Si todo es exitoso, generar el enlace de WhatsApp y limpiar el carrito
+        // Si la API respondió con éxito, generar el enlace de WhatsApp y limpiar el carrito
         const whatsappNumber = '573227671829';
         let message = `Hola mi nombre es ${encodeURIComponent(orderDetails.name)}.%0AHe realizado un pedido para la dirección ${encodeURIComponent(orderDetails.address)} quiero confirmar el pago en ${encodeURIComponent(orderDetails.payment)}.%0A%0A--- Mi pedido es: ---%0A`;
         orderDetails.items.forEach(item => {
@@ -650,15 +621,18 @@ installPromptBtn && installPromptBtn.addEventListener('click', async () => {
 
 installCloseBtn && installCloseBtn.addEventListener('click', () => installBanner.classList.remove('visible'));
 
-// --- Nueva función para obtener los datos de la API ---
+
+// --- FUNCIÓN MODIFICADA: Ahora se conecta a la API de Vercel ---
 const fetchProductsFromSupabase = async () => {
     try {
-        const { data, error } = await supabaseClient
-            .from('products')
-            .select('*');
-        if (error) {
-            throw error;
+        // La URL de tu API de Vercel, no la de Supabase.
+        const response = await fetch('/api/products'); 
+
+        if (!response.ok) {
+            throw new Error('Error al cargar los productos de la API de Vercel.');
         }
+
+        const data = await response.json();
         return data;
     } catch (err) {
         console.error('Error al cargar los productos:', err.message);
