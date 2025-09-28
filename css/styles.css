@@ -128,7 +128,7 @@ body {
 
 .banner-dots {
   position: absolute;
-  bottom: 10px;
+  bottom: 93%;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
